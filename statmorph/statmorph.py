@@ -26,7 +26,7 @@ import photutils
 __all__ = ['ConvolvedSersic2D', 'SourceMorphology', 'source_morphology',
            '__version__']
 
-__version__ = '0.3.5'
+__version__ = '0.3.5NP'
 
 def _quantile(sorted_values, q):
     """
@@ -572,13 +572,16 @@ class SourceMorphology(object):
         The (yc, xc) centroid of the input segment, relative to
         ``_slice_stamp``.
         """
-        image = np.float64(self._cutout_stamp_maskzeroed_no_bg)  # skimage wants double
+        # image = np.float64(self._cutout_stamp_maskzeroed_no_bg)  # skimage wants double
 
-        # Calculate centroid
-        M = skimage.measure.moments(image, order=1)
-        assert M[0, 0] > 0  # already checked by constructor
-        yc = M[1, 0] / M[0, 0]
-        xc = M[0, 1] / M[0, 0]
+        # # Calculate centroid
+        # M = skimage.measure.moments(image, order=1)
+        # assert M[0, 0] > 0  # already checked by constructor
+        # yc = M[1, 0] / M[0, 0]
+        # xc = M[0, 1] / M[0, 0]
+        from photutils.segmentation import source_properties
+        o = source_properties(self._cutout_stamp_maskzeroed_no_bg, self._segmap.data)
+        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
 
         return np.array([xc, yc])
 
@@ -1244,14 +1247,17 @@ class SourceMorphology(object):
         image = np.float64(image)  # skimage wants double
 
         # Calculate centroid
-        M = skimage.measure.moments(image, order=1)
-        if M[0, 0] <= 0:
-            warnings.warn('[deviation] Nonpositive flux within Gini segmap.',
-                          AstropyUserWarning)
-            self.flag = 1
-            return -99.0  # invalid
-        yc = M[1, 0] / M[0, 0]
-        xc = M[0, 1] / M[0, 0]
+        # M = skimage.measure.moments(image, order=1)
+        # if M[0, 0] <= 0:
+        #     warnings.warn('[deviation] Nonpositive flux within Gini segmap.',
+        #                   AstropyUserWarning)
+        #     self.flag = 1
+        #     return -99.0  # invalid
+        # yc = M[1, 0] / M[0, 0]
+        # xc = M[0, 1] / M[0, 0]
+        from photutils.segmentation import source_properties
+        o = source_properties(image,self._segmap_gini)
+        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
 
         # Calculate second total central moment
         Mc = skimage.measure.moments_central(image, center=(yc, xc), order=2)
@@ -2057,14 +2063,17 @@ class SourceMorphology(object):
         yp = sorted_ypeak[0]
 
         # Calculate centroid
-        M = skimage.measure.moments(image, order=1)
-        if M[0, 0] <= 0:
-            warnings.warn('[deviation] Nonpositive flux within MID segmap.',
-                          AstropyUserWarning)
-            self.flag = 1
-            return -99.0  # invalid
-        yc = M[1, 0] / M[0, 0]
-        xc = M[0, 1] / M[0, 0]
+        # M = skimage.measure.moments(image, order=1)
+        # if M[0, 0] <= 0:
+        #     warnings.warn('[deviation] Nonpositive flux within MID segmap.',
+        #                   AstropyUserWarning)
+        #     self.flag = 1
+        #     return -99.0  # invalid
+        # yc = M[1, 0] / M[0, 0]
+        # xc = M[0, 1] / M[0, 0]
+        from photutils.segmentation import source_properties
+        o = source_properties(image,image*0+1)
+        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
 
         area = np.sum(self._segmap_mid)
         D = np.sqrt(np.pi/area) * np.sqrt((xp-xc)**2 + (yp-yc)**2)
