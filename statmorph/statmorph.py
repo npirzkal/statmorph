@@ -581,7 +581,7 @@ class SourceMorphology(object):
         # xc = M[0, 1] / M[0, 0]
         from photutils.segmentation import source_properties
         o = source_properties(self._cutout_stamp_maskzeroed_no_bg, self._segmap.data)
-        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
+        xc,yc = o[0].centroid[1].value,o[0].centroid[0].value
 
         return np.array([xc, yc])
 
@@ -1257,7 +1257,7 @@ class SourceMorphology(object):
         # xc = M[0, 1] / M[0, 0]
         from photutils.segmentation import source_properties
         o = source_properties(image,self._segmap_gini)
-        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
+        xc,yc = o[0].centroid[1].value,o[0].centroid[0].value
 
         # Calculate second total central moment
         Mc = skimage.measure.moments_central(image, center=(yc, xc), order=2)
@@ -2073,7 +2073,7 @@ class SourceMorphology(object):
         # xc = M[0, 1] / M[0, 0]
         from photutils.segmentation import source_properties
         o = source_properties(image,image*0+1)
-        xc,yc = o[0].centroid[0].value,o[0].centroid[1].value
+        xc,yc = o[0].centroid[1].value,o[0].centroid[0].value
 
         area = np.sum(self._segmap_mid)
         D = np.sqrt(np.pi/area) * np.sqrt((xp-xc)**2 + (yp-yc)**2)
